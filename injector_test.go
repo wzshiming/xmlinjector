@@ -47,7 +47,6 @@ func TestInject(t *testing.T) {
 			},
 			want: []byte("<!--key args... -->args...<!--/key-->"),
 		},
-
 		{
 			args: args{
 				key:  []byte("key"),
@@ -67,6 +66,16 @@ func TestInject(t *testing.T) {
 				},
 			},
 			want: []byte("<!--key args... -->args...<!--/key--><!--key args xxxx -->args xxxx<!--/key-->"),
+		},
+		{
+			args: args{
+				key:  []byte("key"),
+				data: []byte("<!--key args... /-->"),
+				inject: func(args, origin []byte) []byte {
+					return args
+				},
+			},
+			want: []byte("<!--key args... -->args...<!-- /key -->"),
 		},
 	}
 	for _, tt := range tests {

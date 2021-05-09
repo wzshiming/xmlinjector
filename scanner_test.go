@@ -64,12 +64,13 @@ func Test_scanPairAnnotationElement(t *testing.T) {
 		data []byte
 	}
 	tests := []struct {
-		name      string
-		args      args
-		wantArgs  []byte
-		wantBegin int
-		wantEnd   int
-		wantErr   bool
+		name       string
+		args       args
+		wantArgs   []byte
+		wantBegin  int
+		wantEnd    int
+		wantSingle bool
+		wantErr    bool
 	}{
 		{
 			args: args{
@@ -189,10 +190,20 @@ func Test_scanPairAnnotationElement(t *testing.T) {
 			wantBegin: 17,
 			wantEnd:   18,
 		},
+		{
+			args: args{
+				key:  []byte("key"),
+				data: []byte("<!-- key xxxx /-->"),
+			},
+			wantArgs:   []byte("xxxx"),
+			wantBegin:  14,
+			wantEnd:    15,
+			wantSingle: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotArgs, gotBegin, gotEnd, err := scanPairAnnotationElement(tt.args.key, tt.args.data)
+			gotArgs, gotBegin, gotEnd, gotSingle, err := scanPairAnnotationElement(tt.args.key, tt.args.data)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("scanPairAnnotationElement() error = %v, wantErr %v", err, tt.wantErr)
 				return
@@ -205,6 +216,9 @@ func Test_scanPairAnnotationElement(t *testing.T) {
 			}
 			if gotEnd != tt.wantEnd {
 				t.Errorf("scanPairAnnotationElement() gotEnd = %v, want %v", gotEnd, tt.wantEnd)
+			}
+			if gotSingle != tt.wantSingle {
+				t.Errorf("scanPairAnnotationElement() gotSingle = %v, want %v", gotSingle, tt.wantSingle)
 			}
 		})
 	}

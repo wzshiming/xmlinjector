@@ -9,7 +9,7 @@ func Inject(key []byte, data []byte, inject func(args, origin []byte) []byte) ([
 	size := len(data)
 	off := 0
 	for {
-		args, begin, end, err := scanPairAnnotationElement(key, data[off:])
+		args, begin, end, single, err := scanPairAnnotationElement(key, data[off:])
 		if err != nil {
 			if errors.Is(err, errNotMatch) {
 				break
@@ -21,9 +21,13 @@ func Inject(key []byte, data []byte, inject func(args, origin []byte) []byte) ([
 		content := inject(args, data[begin:end])
 
 		size += len(content) - (end - begin)
+		if single {
+			size += len(suffix) + len(prefix) + len(endChar) + len(key) + 2
+		}
 		item := injectItem{
 			begin:   begin,
 			end:     end,
+			single:  single,
 			content: content,
 		}
 		list = append(list, item)
@@ -34,7 +38,17 @@ func Inject(key []byte, data []byte, inject func(args, origin []byte) []byte) ([
 	end := 0
 	for _, item := range list {
 		out = append(out, data[end:item.begin]...)
-		out = append(out, item.content...)
+		if item.single {
+			out = append(out, suffix...)
+			out = append(out, item.content...)
+			out = append(out, prefix...)
+			out = append(out, ' ')
+			out = append(out, endChar...)
+			out = append(out, key...)
+			out = append(out, ' ')
+		} else {
+			out = append(out, item.content...)
+		}
 		end = item.end
 	}
 	out = append(out, data[end:]...)
@@ -44,5 +58,6 @@ func Inject(key []byte, data []byte, inject func(args, origin []byte) []byte) ([
 type injectItem struct {
 	begin   int
 	end     int
+	single  bool
 	content []byte
 }
