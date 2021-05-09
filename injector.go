@@ -18,8 +18,18 @@ func Inject(key []byte, data []byte, inject func(args, origin []byte) []byte) ([
 		}
 		begin += off
 		end += off
-		content := inject(args, data[begin:end])
-
+		origin := data[begin:end]
+		if single {
+			origin = nil
+		}
+		content := inject(args, origin)
+		if single {
+			if len(content) == 0 {
+				off = end + len(suffix)
+				continue
+			}
+			size += len(suffix) + len(prefix) + len(endChar) + len(key) + 2
+		}
 		size += len(content) - (end - begin)
 		if single {
 			size += len(suffix) + len(prefix) + len(endChar) + len(key) + 2

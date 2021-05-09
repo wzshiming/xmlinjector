@@ -6,6 +6,9 @@ import (
 )
 
 func TestInject(t *testing.T) {
+	inject := func(args, origin []byte) []byte {
+		return append(args[:len(args):len(args)], origin...)
+	}
 	type args struct {
 		key    []byte
 		data   []byte
@@ -19,53 +22,67 @@ func TestInject(t *testing.T) {
 	}{
 		{
 			args: args{
-				key:  []byte(""),
-				data: []byte(""),
-				inject: func(args, origin []byte) []byte {
-					return args
-				},
+				key:    []byte(""),
+				data:   []byte(""),
+				inject: inject,
 			},
 			wantErr: true,
 		},
 		{
 			args: args{
-				key:  []byte("key"),
-				data: []byte("xxxx"),
-				inject: func(args, origin []byte) []byte {
-					return args
-				},
+				key:    []byte("key"),
+				data:   []byte("xxxx"),
+				inject: inject,
 			},
 			want: []byte("xxxx"),
 		},
 		{
 			args: args{
-				key:  []byte("key"),
-				data: []byte("<!--key args... --><!--/key-->"),
-				inject: func(args, origin []byte) []byte {
-					return args
-				},
+				key:    []byte("key"),
+				data:   []byte("<!--key args... --><!--/key-->"),
+				inject: inject,
 			},
 			want: []byte("<!--key args... -->args...<!--/key-->"),
 		},
 		{
 			args: args{
-				key:  []byte("key"),
-				data: []byte("<!--key args... -->XXXXXXXX<!--/key-->"),
-				inject: func(args, origin []byte) []byte {
-					return args
-				},
+				key:    []byte("key"),
+				data:   []byte("<!--key args... -->XXXXXXXX<!--/key-->"),
+				inject: inject,
 			},
-			want: []byte("<!--key args... -->args...<!--/key-->"),
+			want: []byte("<!--key args... -->args...XXXXXXXX<!--/key-->"),
 		},
 		{
 			args: args{
-				key:  []byte("key"),
-				data: []byte("<!--key args... -->XXXXXXXX<!--/key--><!--key args xxxx --><!--/key-->"),
-				inject: func(args, origin []byte) []byte {
-					return args
-				},
+				key:    []byte("key"),
+				data:   []byte("<!--key args... -->XXXXXXXX<!--/key--><!--key args xxxx --><!--/key-->"),
+				inject: inject,
 			},
-			want: []byte("<!--key args... -->args...<!--/key--><!--key args xxxx -->args xxxx<!--/key-->"),
+			want: []byte("<!--key args... -->args...XXXXXXXX<!--/key--><!--key args xxxx -->args xxxx<!--/key-->"),
+		},
+		{
+			args: args{
+				key:    []byte("key"),
+				data:   []byte("<!--key args... / -->"),
+				inject: inject,
+			},
+			want: []byte("<!--key args... / -->"),
+		},
+		{
+			args: args{
+				key:    []byte("key"),
+				data:   []byte("<!--key args... /-->"),
+				inject: inject,
+			},
+			want: []byte("<!--key args... -->args...<!-- /key -->"),
+		},
+		{
+			args: args{
+				key:    []byte("key"),
+				data:   []byte("<!--key /--><!--key args... /-->"),
+				inject: inject,
+			},
+			want: []byte("<!--key /--><!--key args... -->args...<!-- /key -->"),
 		},
 		{
 			args: args{
