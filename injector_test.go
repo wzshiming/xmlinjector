@@ -94,6 +94,16 @@ func TestInject(t *testing.T) {
 			},
 			want: []byte("<!--key args... -->args...<!-- /key -->"),
 		},
+		{
+			args: args{
+				key:  []byte("key"),
+				data: []byte("<!--key\nargs...\n/-->"),
+				inject: func(args, origin []byte) []byte {
+					return args
+				},
+			},
+			want: []byte("<!--key\nargs...\n-->args...<!-- /key -->"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -106,7 +116,7 @@ func TestInject(t *testing.T) {
 				t.Errorf("Inject() got = %q, want %q", got, tt.want)
 			}
 			if len(got) != cap(got) {
-				t.Errorf("Inject() len != cap, len = %q, cap = %q", len(got), cap(got))
+				t.Errorf("Inject() len != cap, len = %d, cap = %d", len(got), cap(got))
 			}
 		})
 	}

@@ -200,6 +200,25 @@ func Test_scanPairAnnotationElement(t *testing.T) {
 			wantEnd:    15,
 			wantSingle: true,
 		},
+		{
+			args: args{
+				key:  []byte("key"),
+				data: []byte("<!--\nkey\nxxxx\n--> <!--\n/key\n-->"),
+			},
+			wantArgs:  []byte("xxxx"),
+			wantBegin: 17,
+			wantEnd:   18,
+		},
+		{
+			args: args{
+				key:  []byte("key"),
+				data: []byte("<!--\nkey\nxxxx\n/-->"),
+			},
+			wantArgs:   []byte("xxxx"),
+			wantBegin:  14,
+			wantEnd:    15,
+			wantSingle: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

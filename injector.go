@@ -31,9 +31,6 @@ func Inject(key []byte, data []byte, inject func(args, origin []byte) []byte) ([
 			size += len(suffix) + len(prefix) + len(endChar) + len(key) + 2
 		}
 		size += len(content) - (end - begin)
-		if single {
-			size += len(suffix) + len(prefix) + len(endChar) + len(key) + 2
-		}
 		item := injectItem{
 			begin:   begin,
 			end:     end,

@@ -28,7 +28,7 @@ func scanPairAnnotationElement(key []byte, data []byte) (args []byte, begin int,
 				return false
 			}
 			if index+len(key) != len(content) &&
-				content[index+len(key)] != ' ' {
+				!isSpace(content[index+len(key)]) {
 				return false
 			}
 			keyIndex = index
@@ -57,7 +57,7 @@ func scanPairAnnotationElement(key []byte, data []byte) (args []byte, begin int,
 			}
 			keyEnd := index + 1 + len(key)
 			if keyEnd != len(content) &&
-				content[keyEnd] != ' ' {
+				!isSpace(content[keyEnd]) {
 				return false
 			}
 			return true
@@ -113,5 +113,5 @@ func strIndexIgnoreSpace(s, sep []byte) int {
 }
 
 func isSpace(b byte) bool {
-	return b == ' ' || b == '\t'
+	return b == ' ' || b == '\t' || b == '\n'
 }
